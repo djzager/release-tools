@@ -10,7 +10,7 @@ import (
 // but noticed that https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
 // has a lot more that we may want to leverage in the future, so here we have
 // another custom type.
-type GitHubContext struct {
+type GitHubVariables struct {
 	// These may be useful for us when testing/debugging actions
 	CI            bool `env:"CI"`
 	GithubActions bool `env:"GITHUB_ACTIONS"`
@@ -19,15 +19,20 @@ type GitHubContext struct {
 	GithubEventPath string `env:"GITHUB_EVENT_PATH"`
 }
 
-func GetGitHubContext() (GitHubContext, error) {
-	var ghContext GitHubContext
+// VarsFromEnv retrieves GitHubVariables struct from the environment
+// and returns it along with an error. It returns an error if GITHUB_ACTIONS
+// environment is not set to "true", which is guaranteed when run on a GitHub
+// runner.
+func VarsFromEnv() (GitHubVariables, error) {
+	var ghContext GitHubVariables
 	_, err := env.UnmarshalFromEnviron(&ghContext)
 	if err != nil {
-		return GitHubContext{}, err
+		return GitHubVariables{}, err
 	}
 
+	// If this isn't a GitHub Action environment, we should say something
 	if !ghContext.GithubActions {
-		return GitHubContext{}, fmt.Errorf("GITHUB_ACTIONS false.")
+		return GitHubVariables{}, fmt.Errorf("GITHUB_ACTIONS false.")
 	}
 	return ghContext, nil
 }

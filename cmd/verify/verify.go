@@ -10,11 +10,12 @@ import (
 
 	"github.com/google/go-github/v49/github"
 	"github.com/konveyor/release-tools/action"
+	"github.com/konveyor/release-tools/pr"
 )
 
 func main() {
 
-	ghContext, err := action.GetGitHubContext()
+	ghContext, err := action.VarsFromEnv()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,6 +37,17 @@ func main() {
 		}
 		return event, nil
 	}()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	fmt.Printf("PR Title %v", event.PullRequest.Title)
+	prType, prTitle, err := pr.TypeFromTitle(*event.PullRequest.Title)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println()
+	fmt.Printf("PR type: %#q\n", prType)
+	fmt.Printf("PR title: %#q\n", prTitle)
+	fmt.Println()
 }
