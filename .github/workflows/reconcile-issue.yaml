@@ -1,10 +1,19 @@
-name: Reconcile Issue
+name: Reusable Reconcile Issue
 
 on:
   workflow_call:
 
 jobs:
+  event_type:
+    name: Check event type
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' || github.event_name == 'pull_request'
+    steps:
+      - name: ok
+        run: /bin/true
+
   labels:
+    needs: event_type
     name: Check labels
     runs-on: ubuntu-latest
     if: github.event.action != 'closed'
@@ -137,6 +146,7 @@ jobs:
             }
 
   project:
+    needs: event_type
     name: Add new issues to planning project
     runs-on: ubuntu-latest
     if: github.event.action == 'opened'
